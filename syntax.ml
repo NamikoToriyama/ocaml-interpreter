@@ -1,5 +1,5 @@
 (* op_t : ２項演算子の型 *)
-type op_t = Plus | Minus | Times | Equal | Less | More
+type op_t = Plus | Minus | Times | Equal | Less | More | If | Else | Then
 
 (* ２項演算子を文字列にする関数 *)
 (* op_to_string : op_t -> string *)
@@ -9,12 +9,16 @@ let op_to_string op = match op with
   | Times -> " * "
   | Equal -> " = "
   | Less -> " < "
-  | More -> ">"
+  | More -> " > "
+  | If -> " if "
+  | Else -> " else "
+  | Then -> " then "
 
 (* Syntax.t : プログラムを表す型 *)
 type t = Number of int
        | Bool of bool
        | Op of t * op_t * t
+       | OpIf of op_t * t * op_t * t * op_t * t
 
 (* プログラムを文字列にする関数 *)
 (* Syntax.to_string : Syntax.t -> string *)
@@ -25,6 +29,13 @@ let rec to_string exp = match exp with
       "(" ^ to_string arg1
           ^ op_to_string op
           ^ to_string arg2 ^ ")"
+  | OpIf (op1, arg1, op2, arg2, op3, arg3) -> 
+      "(" ^ op_to_string op1
+          ^ to_string arg1
+          ^ op_to_string op2
+          ^ to_string arg2
+          ^ op_to_string op3
+          ^ to_string arg3 ^ ")"
 
 (* プログラムをプリントする関数 *)
 (* Syntax.print : Syntax.t -> unit *)

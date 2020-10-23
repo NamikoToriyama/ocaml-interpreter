@@ -23,6 +23,9 @@ rule token = parse
 | ">"     { MORE }
 | "true"  { TRUE }
 | "false" { FALSE }
+| "if"    { IF }
+| "else"  { ELSE }
+| "then"  { THEN }
 | "("     { LPAREN }
 | ")"     { RPAREN }
 | digit+                        (* 数字が１個以上 *)
