@@ -12,6 +12,9 @@ open Syntax
 %token EQUAL LESS MORE
 %token LPAREN RPAREN
 %token IF THEN ELSE
+%token <string> VAR
+/* これは、変数には string 型の値が伴うことを示している */
+%token LET IN
 %token EOF
 /* End of File: 入力の終わりを示す */
 
@@ -23,8 +26,10 @@ open Syntax
 
 /* 演算子の優先順位を指定する */
 /* 下に行くほど強く結合する */
-%nonassoc ELSE THEN IF
-%nonassoc EQUAL LESS MORE
+%nonassoc IN
+%nonassoc THEN
+%nonassoc ELSE IF
+%right EQUAL LESS MORE
 %left PLUS MINUS
 %left TIMES
 %nonassoc UNARY
@@ -45,6 +50,8 @@ simple_expr:
         { Bool (true) }
 | FALSE
         { Bool (false) }
+| VAR
+        { Var ($1) }
 | LPAREN expr RPAREN
         { $2 }
 
@@ -65,5 +72,7 @@ expr:
         { Op ($3, More, $1) }
 | IF expr THEN expr ELSE expr
         { OpIf (If, $2, Then, $4, Else, $6) }
+| LET expr EQUAL expr IN expr
+        { OpLet ($2, $4, $6) }
 | MINUS expr %prec UNARY
         { Op (Number (0), Minus, $2) }
