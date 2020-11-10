@@ -73,7 +73,7 @@ let rec f expr env = match expr with
                               Value.to_string v1 env ^ ", " ^
                               Value.to_string v2 env)
       end
-  | OpIf (If, arg1, Then, arg2, Else, arg3) -> 
+  | OpIf (arg1, arg2, arg3) -> 
       let b1 = f arg1 env in
       begin match (b1) with
         VBool (b1) ->
@@ -92,6 +92,4 @@ let rec f expr env = match expr with
       let v2 = f arg2 env in
       let env1 = Env.extend env (Syntax.to_string arg1) v2 in f arg3 env1
   | Op (_, _, _) -> failwith ("Parse.fail op")
-  | OpIf (_, _, _, _, _, _) -> failwith ("Parse.fail opIf")
  
-

@@ -1,6 +1,12 @@
 %{
 (* 補助的な変数、関数、型などの定義 *)
 open Syntax
+
+(* 目的：変数列と本体の式から、入れ子になった１引数関数を作る *)
+(* create_fun : string list -> Syntax.t -> Syntax.t *)
+(* let create_fun variables expr =
+  List.fold_right (fun var expr -> Fun (var, expr)) variables expr *)
+
 %}
 
 /* 以降、どういうわけかコメントが C 式になることに注意 */
@@ -14,7 +20,7 @@ open Syntax
 %token IF THEN ELSE
 %token <string> VAR
 /* これは、変数には string 型の値が伴うことを示している */
-%token LET IN
+%token LET IN FUN ARROW
 %token EOF
 /* End of File: 入力の終わりを示す */
 
@@ -52,6 +58,10 @@ simple_expr:
         { Bool (false) }
 | VAR
         { Var ($1) }
+/* | VAR variables
+        { $1 :: $2 }
+| FUN variables ARROW expr
+        { Fun ($2, $4) } */
 | LPAREN expr RPAREN
         { $2 }
 
@@ -71,8 +81,10 @@ expr:
 | expr MORE expr
         { Op ($3, More, $1) }
 | IF expr THEN expr ELSE expr
-        { OpIf (If, $2, Then, $4, Else, $6) }
+        { OpIf ($2, $4, $6) }
 | LET expr EQUAL expr IN expr
         { OpLet ($2, $4, $6) }
+/* | LET VAR variables EQUAL expr IN expr
+        { Let ($2, create_fun $3 $5, $7) } */
 | MINUS expr %prec UNARY
         { Op (Number (0), Minus, $2) }
