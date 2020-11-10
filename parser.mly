@@ -4,8 +4,8 @@ open Syntax
 
 (* 目的：変数列と本体の式から、入れ子になった１引数関数を作る *)
 (* create_fun : string list -> Syntax.t -> Syntax.t *)
-(* let create_fun variables expr =
-  List.fold_right (fun var expr -> Fun (var, expr)) variables expr *)
+(*let create_fun variables expr =
+  List.fold_right (fun var expr -> Fun (var, expr)) variables expr*)
 
 %}
 
@@ -82,8 +82,8 @@ expr:
         { Op ($3, More, $1) }
 | IF expr THEN expr ELSE expr
         { OpIf ($2, $4, $6) }
-| LET expr EQUAL expr IN expr
-        { OpLet ($2, $4, $6) }
+| LET VAR EQUAL expr IN expr
+        { Let ($2, $4, $6) }
 /* | LET VAR variables EQUAL expr IN expr
         { Let ($2, create_fun $3 $5, $7) } */
 | MINUS expr %prec UNARY

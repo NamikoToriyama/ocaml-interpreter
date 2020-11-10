@@ -14,12 +14,15 @@ let op_to_string op = match op with
   | Else -> " else "
 
 (* Syntax.t : プログラムを表す型 *)
-type t = Number of int
-       | Bool of bool
-       | Var of string
-       | Op of t * op_t * t
-       | OpIf of  t * t * t
-       | OpLet of t * t * t
+type t = Number of int                         (* 整数 *)
+       | Bool of bool                          (* 真偽値 *)
+       | Var of string                         (* 変数 *)
+       | Op of t * op_t * t                    (* ２項演算 *)
+       | OpIf of  t * t * t                    (* 条件文 *)
+       | Let of string * t * t                    (* 変数定義 *)
+       (* | Letrec of string * string * t * t     (* 再帰関数定義 *)
+       | Fun of string * t                     (* fun 文 *)
+       | App of t * t                          関数呼び出し *)
 
 (* プログラムを文字列にする関数 *)
 (* Syntax.to_string : Syntax.t -> string *)
@@ -35,11 +38,11 @@ let rec to_string exp = match exp with
       "(" ^ to_string arg1
           ^ to_string arg2
           ^ to_string arg3 ^ ")"
-  | OpLet (arg1, arg2, arg3) ->
-      "(" ^ to_string arg1 
+  | Let (x, arg2, arg3) ->
+      "(let" ^  x ^ " = " 
           ^ to_string arg2 
           ^ to_string arg3 ^ ")"
-
+  
 (* プログラムをプリントする関数 *)
 (* Syntax.print : Syntax.t -> unit *)
 let print exp =

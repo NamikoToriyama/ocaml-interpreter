@@ -88,8 +88,8 @@ let rec f expr env = match expr with
                 end
         | (_) -> failwith ("Predicate is not a boolean: " ^ Value.to_string b1 env)
       end
-  | OpLet (arg1, arg2, arg3) ->
+  | Let (x, arg2, arg3) ->
       let v2 = f arg2 env in
-      let env1 = Env.extend env (Syntax.to_string arg1) v2 in f arg3 env1
+      let env1 = Env.extend env x v2 in f arg3 env1
   | Op (_, _, _) -> failwith ("Parse.fail op")
  
