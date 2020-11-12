@@ -20,9 +20,9 @@ type t = Number of int                         (* 整数 *)
        | Op of t * op_t * t                    (* ２項演算 *)
        | OpIf of  t * t * t                    (* 条件文 *)
        | Let of string * t * t                    (* 変数定義 *)
-       (* | Letrec of string * string * t * t     (* 再帰関数定義 *)
+       | Letrec of string * string * t * t     (* 再帰関数定義 *)
        | Fun of string * t                     (* fun 文 *)
-       | App of t * t                          関数呼び出し *)
+       | App of t * t                          (* 関数呼び出し*)
 
 (* プログラムを文字列にする関数 *)
 (* Syntax.to_string : Syntax.t -> string *)
@@ -42,6 +42,16 @@ let rec to_string exp = match exp with
       "(let" ^  x ^ " = " 
           ^ to_string arg2 
           ^ to_string arg3 ^ ")"
+  | Letrec (f, x, arg1, arg2) -> 
+      "(let rec" ^ f ^  " " 
+          ^ x  ^ "="
+          ^ to_string arg1
+          ^ to_string arg2 ^ ")"
+  | Fun (x, arg1) ->
+      "(fun " ^ x ^ "->" ^ to_string arg1 ^ ")"
+  | App (arg1, arg2) ->
+      "(" ^ to_string arg1 ^ " " ^ to_string arg2 ^")"
+  
   
 (* プログラムをプリントする関数 *)
 (* Syntax.print : Syntax.t -> unit *)

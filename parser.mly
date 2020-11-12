@@ -4,8 +4,8 @@ open Syntax
 
 (* 目的：変数列と本体の式から、入れ子になった１引数関数を作る *)
 (* create_fun : string list -> Syntax.t -> Syntax.t *)
-(*let create_fun variables expr =
-  List.fold_right (fun var expr -> Fun (var, expr)) variables expr*)
+let create_fun variables expr =
+  List.fold_right (fun var expr -> Fun (var, expr)) variables expr
 
 %}
 
@@ -20,7 +20,7 @@ open Syntax
 %token IF THEN ELSE
 %token <string> VAR
 /* これは、変数には string 型の値が伴うことを示している */
-%token LET IN FUN ARROW
+%token LET REC IN FUN ARROW
 %token EOF
 /* End of File: 入力の終わりを示す */
 
@@ -34,8 +34,9 @@ open Syntax
 /* 下に行くほど強く結合する */
 %nonassoc IN
 %nonassoc THEN
-%nonassoc ELSE IF
-%right EQUAL LESS MORE
+%nonassoc ELSE
+%nonassoc ARROW
+%nonassoc EQUAL LESS MORE
 %left PLUS MINUS
 %left TIMES
 %nonassoc UNARY
@@ -58,12 +59,9 @@ simple_expr:
         { Bool (false) }
 | VAR
         { Var ($1) }
-/* | VAR variables
-        { $1 :: $2 }
-| FUN variables ARROW expr
-        { Fun ($2, $4) } */
 | LPAREN expr RPAREN
         { $2 }
+
 
 expr:
 | simple_expr
@@ -84,7 +82,25 @@ expr:
         { OpIf ($2, $4, $6) }
 | LET VAR EQUAL expr IN expr
         { Let ($2, $4, $6) }
-/* | LET VAR variables EQUAL expr IN expr
-        { Let ($2, create_fun $3 $5, $7) } */
+| LET VAR variables EQUAL expr IN expr
+        { Let ($2, create_fun $3 $5, $7) }
+| LET REC VAR variables EQUAL expr IN expr
+        { Letrec ($3, List.hd $4, create_fun (List.tl $4) $6, $8) }
+| FUN variables ARROW expr
+        { create_fun $2 $4 }
+| app
+        { $1 }
 | MINUS expr %prec UNARY
         { Op (Number (0), Minus, $2) }
+
+variables:
+| VAR
+        { [$1] }
+| VAR variables
+        { $1 :: $2 }
+
+app:
+| simple_expr simple_expr
+        { App ($1, $2) }
+| app simple_expr
+        { App ($1, $2) }

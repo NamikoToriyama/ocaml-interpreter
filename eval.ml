@@ -2,13 +2,6 @@ open Syntax
 open Value
 open Env
 
-let env_get env v1 =
-    let v = VVar(v1) in
-        try
-            Env.get env v
-        with Not_found -> failwith ("Unbound variable: " ^ v1)
-
-
 (* 実際の計算をする関数 *)
 (* Eval.f : Syntax.t -> Value.t *)
 let rec f expr env = match expr with
@@ -91,5 +84,14 @@ let rec f expr env = match expr with
   | Let (x, arg2, arg3) ->
       let v2 = f arg2 env in
       let env1 = Env.extend env x v2 in f arg3 env1
+  | Fun (x, arg1) -> Clo(x, arg1, env) 
+  | App (arg1, arg2) -> 
+        let v1 = f arg1 env in 
+        let v2 = f arg2 env in
+        begin match v1 with
+            Clo(x, t, env1) -> 
+                let env2 = Env.extend env1 x v2 in f t env2
+            | (_) -> failwith ("Not a function: " ^ Value.to_string v1 env )
+        end
   | Op (_, _, _) -> failwith ("Parse.fail op")
- 
+  | Letrec(_, _, _, _) -> failwith ("Rec is not implemented yet")

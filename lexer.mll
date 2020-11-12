@@ -20,7 +20,7 @@ rule token = parse
 | "true"  { TRUE }   | "false" { FALSE }
 | "if"    { IF }     | "else"  { ELSE }  | "then"  { THEN }
 | "let"   { LET }    | "in"    { IN }
-(* | "fun"   { FUN }    | "->"    { ARROW } *)
+| "fun"   { FUN }    | "->"    { ARROW } | "rec"   { REC }
 | "("     { LPAREN } | ")"     { RPAREN }
 | digit+                        (* 数字が１個以上 *)
           { NUMBER (int_of_string (Lexing.lexeme lexbuf)) }
