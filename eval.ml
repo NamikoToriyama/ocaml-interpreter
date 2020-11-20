@@ -10,6 +10,7 @@ let rec f expr env = match expr with
   | Var (s) ->  begin try Env.get env s with
                     Not_found -> failwith ("Unbound variable: " ^ s)
                 end
+  | Nil ->  VList ([])
   | Op (arg1, Plus, arg2) ->
       let v1 = f arg1 env in
       let v2 = f arg2 env in
@@ -88,5 +89,21 @@ let rec f expr env = match expr with
                 let env2 = Env.extend env1 g (CloR (g, x, t, env1)) in
                 let env3 = Env.extend env2 x v2 in f t env3
             | (_) -> failwith ("Not a function: " ^ Value.to_string v1 env )
+        end
+  | Cons (arg1, arg2) -> 
+        let v1 = f arg1 env in
+        let v2 = f arg2 env in
+        begin match v2  with
+            VList (lst) -> VList(v1::lst)
+            | (_) -> failwith ("Not a list:" ^ Value.to_string v1 env)
+        end
+  | Match (arg1, arg2, x, y, arg3) -> 
+        let v1 = f arg1 env in
+        begin match v1 with 
+            VList([]) -> f arg2 env 
+            | VList(first::rest) -> 
+                let env1 = Env.extend env x first in
+                let env2 = Env.extend env1 y (VList(rest)) in f arg3 env2
+            | (_) -> failwith ("Not match a list:" ^ Syntax.to_string arg1^" "^Syntax.to_string arg2^" "^x^" "^y^" "^Syntax.to_string arg3)
         end
   | Op (_, _, _) -> failwith ("Parse.fail op")

@@ -21,6 +21,9 @@ rule token = parse
 | "if"    { IF }     | "else"  { ELSE }  | "then"  { THEN }
 | "let"   { LET }    | "in"    { IN }
 | "fun"   { FUN }    | "->"    { ARROW } | "rec"   { REC }
+| "["     { LBRACKET } | "]"     { RBRACKET }
+| "match" { MATCH }  | "with"  { WITH }
+| "::"    { CONS }   | "|"     { BAR }   | ";"     { SEMI }
 | "("     { LPAREN } | ")"     { RPAREN }
 | digit+                        (* 数字が１個以上 *)
           { NUMBER (int_of_string (Lexing.lexeme lexbuf)) }
