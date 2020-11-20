@@ -42,7 +42,6 @@ let rec f expr env = match expr with
       let v2 = f arg2 env in
       begin match (v1, v2) with
           (VNumber (n1), VNumber (n2)) -> if n1 == n2 then VBool(true) else VBool(false)
-        | (VBool(b1), VBool(b2)) -> if b1 == b2 then VBool(true) else VBool(false)
         | (_, _) -> failwith ("Bad arguments to =: " ^
                               Value.to_string v1 env ^ ", " ^
                               Value.to_string v2 env)
@@ -70,20 +69,14 @@ let rec f expr env = match expr with
       let b1 = f arg1 env in
       begin match (b1) with
         VBool (b1) ->
-            let v2 = f arg2 env in 
-            let v3 = f arg3 env in
-            begin match (v2, v3) with
-                (VNumber (v2), VNumber(v3)) -> if b1 then VNumber (v2) else VNumber(v3)
-                | (VNumber (v2), VBool(v3)) -> if b1 then VNumber (v2) else VBool(v3)
-                | (VBool (v2), VNumber(v3)) -> if b1 then VBool (v2) else VNumber(v3)
-                | (VBool (v2), VBool(v3)) -> if b1 then VBool (v2) else VBool(v3)
-                | (_, _) -> failwith ("If.statement match error")
-                end
+            if b1 then f arg2 env else f arg3 env
         | (_) -> failwith ("Predicate is not a boolean: " ^ Value.to_string b1 env)
       end
   | Let (x, arg2, arg3) ->
       let v2 = f arg2 env in
       let env1 = Env.extend env x v2 in f arg3 env1
+  | Letrec (g, x, arg1, arg2) -> 
+      let env1 = Env.extend env g (CloR (g, x, arg1, env)) in f arg2 env1
   | Fun (x, arg1) -> Clo(x, arg1, env) 
   | App (arg1, arg2) -> 
         let v1 = f arg1 env in 
@@ -91,7 +84,9 @@ let rec f expr env = match expr with
         begin match v1 with
             Clo(x, t, env1) -> 
                 let env2 = Env.extend env1 x v2 in f t env2
+            | CloR (g, x, t, env1) ->
+                let env2 = Env.extend env1 g (CloR (g, x, t, env1)) in
+                let env3 = Env.extend env2 x v2 in f t env3
             | (_) -> failwith ("Not a function: " ^ Value.to_string v1 env )
         end
   | Op (_, _, _) -> failwith ("Parse.fail op")
-  | Letrec(_, _, _, _) -> failwith ("Rec is not implemented yet")
