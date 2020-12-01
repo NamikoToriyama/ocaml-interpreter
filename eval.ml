@@ -104,6 +104,6 @@ let rec f expr env = match expr with
             | VList(first::rest) -> 
                 let env1 = Env.extend env x first in
                 let env2 = Env.extend env1 y (VList(rest)) in f arg3 env2
-            | (_) -> failwith ("Not match a list:" ^ Syntax.to_string arg1^" "^Syntax.to_string arg2^" "^x^" "^y^" "^Syntax.to_string arg3)
+            | (_) -> failwith ("Not a list: " ^ Value.to_string v1 env)
         end
   | Op (_, _, _) -> failwith ("Parse.fail op")
