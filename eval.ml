@@ -12,32 +12,32 @@ let rec f expr env cont = match expr with
                 end
   | Nil ->  VList ([])
   | Op (arg1, Plus, arg2) ->
-      let v1 = f arg1 env cont in
-      let v2 = f arg2 env cont in
-      begin match (v1, v2) with
+      f arg1 env (fun x -> 
+      f arg2 env (fun y -> 
+        begin match (x, y) with
           (VNumber (n1), VNumber (n2)) -> cont (VNumber (n1 + n2))
-        | (_, _) -> failwith ("Bad arguments to +: " ^
-                              Value.to_string v1 env ^ ", " ^
-                              Value.to_string v2 env)
-      end
+          | (_, _) -> cont (failwith ("Bad arguments to +: " ^
+                            Value.to_string x env ^ ", " ^
+                            Value.to_string y env ))
+      end))
   | Op (arg1, Minus, arg2) ->
-      let v1 = f arg1 env cont in
-      let v2 = f arg2 env cont in
-      begin match (v1, v2) with
+      f arg1 env (fun x -> 
+      f arg2 env (fun y -> 
+        begin match (x, y) with
           (VNumber (n1), VNumber (n2)) -> cont (VNumber (n1 - n2))
-        | (_, _) -> failwith ("Bad arguments to -: " ^
-                              Value.to_string v1 env ^ ", " ^
-                              Value.to_string v2 env)
-      end
+          | (_, _) -> cont (failwith ("Bad arguments to -: " ^
+                            Value.to_string x env ^ ", " ^
+                            Value.to_string y env ))
+      end))
   | Op (arg1, Times, arg2) ->
-      let v1 = f arg1 env cont in
-      let v2 = f arg2 env cont in
-      begin match (v1, v2) with
-          (VNumber (n1), VNumber (n2)) -> VNumber (n1 * n2)
-        | (_, _) -> failwith ("Bad arguments to *: " ^
-                              Value.to_string v1 env ^ ", " ^
-                              Value.to_string v2 env)
-      end
+      f arg1 env (fun x -> 
+      f arg2 env (fun y -> 
+        begin match (x, y) with
+          (VNumber (n1), VNumber (n2)) -> cont (VNumber (n1 * n2))
+          | (_, _) -> cont (failwith ("Bad arguments to *: " ^
+                            Value.to_string x env ^ ", " ^
+                            Value.to_string y env ))
+      end))
   | Op (arg1, Equal, arg2) ->
       let v1 = f arg1 env cont in
       let v2 = f arg2 env cont in
