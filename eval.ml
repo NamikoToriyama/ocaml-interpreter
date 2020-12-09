@@ -68,12 +68,12 @@ let rec f expr env cont = match expr with
                                 Value.to_string y env ))
             end))
   | OpIf (arg1, arg2, arg3) -> 
-      let b1 = f arg1 env cont in
-      begin match (b1) with
-        VBool (b1) ->
-            if b1 then f arg2 env cont else f arg3 env cont
-        | (_) -> cont(failwith ("Predicate is not a boolean: " ^ Value.to_string b1 env))
-      end
+      f arg1 env (fun x -> 
+      begin match x with
+      VBool (x) ->
+            if x then f arg2 env cont else f arg3 env cont
+        | (_) -> cont(failwith ("Predicate is not a boolean: " ^ Value.to_string x env))
+      end)
   | Let (x, arg2, arg3) ->
       let v2 = f arg2 env cont in
       let env1 = Env.extend env x v2 in f arg3 env1 cont
