@@ -10,7 +10,7 @@ let rec f expr env cont = match expr with
   | Var (s) ->  begin try cont(Env.get env s) with
                     Not_found -> cont (failwith ("Unbound variable: " ^ s))
                 end
-  | Nil ->  VList ([])
+  | Nil ->  cont(VList ([]))
   | Op (arg1, Plus, arg2) ->
       f arg1 env (fun x -> 
       f arg2 env (fun y -> 
@@ -76,8 +76,7 @@ let rec f expr env cont = match expr with
       end)
   | Let (x, arg2, arg3) ->
       f arg2 env (fun v2 ->
-      let env1 = Env.extend env x v2 in f arg3 env1 cont
-      )
+      let env1 = Env.extend env x v2 in f arg3 env1 cont)
   | Letrec (g, x, arg1, arg2) -> 
       let env1 = Env.extend env g (CloR (g, x, arg1, env)) in f arg2 env1 cont
   | Fun (x, arg1) -> cont (Clo(x, arg1, env) )
@@ -91,22 +90,22 @@ let rec f expr env cont = match expr with
                 let env2 = Env.extend env1 g (CloR (g, x, t, env1)) in
                 let env3 = Env.extend env2 x v2 in f t env3 cont
             | (_) -> cont(failwith ("Not a function: " ^ Value.to_string v1 env ))
-        end
-        ))
+        end))
   | Cons (arg1, arg2) -> 
-        let v1 = f arg1 env cont in
-        let v2 = f arg2 env cont in
-        begin match v2  with
-            VList (lst) -> VList(v1::lst)
+        f arg1 env (fun v1 ->
+        f arg2 env (fun v2 ->
+        begin match v2 with
+            VList (lst) -> cont(VList(v1::lst))
             | (_) -> cont(failwith ("Not a list:" ^ Value.to_string v1 env))
-        end
+        end))
   | Match (arg1, arg2, x, y, arg3) -> 
-        let v1 = f arg1 env cont in
-        begin match v1 with 
-            VList([]) -> f arg2 env cont
-            | VList(first::rest) -> 
-                let env1 = Env.extend env x first in
-                let env2 = Env.extend env1 y (VList(rest)) in f arg3 env2 cont
-            | (_) -> cont(failwith ("Not a list: " ^ Value.to_string v1 env))
-        end
+        f arg1 env (fun v1 ->
+            begin match v1 with 
+                VList([]) -> f arg2 env cont
+                | VList(first::rest) -> 
+                    let env1 = Env.extend env x first in
+                    let env2 = Env.extend env1 y (VList(rest)) in f arg3 env2 cont
+                | (_) -> cont(failwith ("Not a list: " ^ Value.to_string v1 env))
+            end
+        )        
   | Op (_, _, _) -> cont(failwith ("Parse.fail op"))
