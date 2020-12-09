@@ -82,8 +82,8 @@ let rec f expr env cont = match expr with
       let env1 = Env.extend env g (CloR (g, x, arg1, env)) in f arg2 env1 cont
   | Fun (x, arg1) -> cont (Clo(x, arg1, env) )
   | App (arg1, arg2) -> 
-        let v1 = f arg1 env cont in 
-        let v2 = f arg2 env cont in
+        f arg1 env (fun v1 -> 
+        f arg2 env (fun v2 ->
         begin match v1 with
             Clo(x, t, env1) -> 
                 let env2 = Env.extend env1 x v2 in f t env2 cont
@@ -92,6 +92,7 @@ let rec f expr env cont = match expr with
                 let env3 = Env.extend env2 x v2 in f t env3 cont
             | (_) -> cont(failwith ("Not a function: " ^ Value.to_string v1 env ))
         end
+        ))
   | Cons (arg1, arg2) -> 
         let v1 = f arg1 env cont in
         let v2 = f arg2 env cont in
