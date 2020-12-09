@@ -7,8 +7,8 @@ open Env
 let rec f expr env cont = match expr with
     Number (n) -> cont (VNumber(n))
   | Bool (b) ->  cont (VBool(b))
-  | Var (s) ->  begin try Env.get env s with
-                    Not_found -> failwith ("Unbound variable: " ^ s)
+  | Var (s) ->  begin try cont(Env.get env s) with
+                    Not_found -> cont (failwith ("Unbound variable: " ^ s))
                 end
   | Nil ->  VList ([])
   | Op (arg1, Plus, arg2) ->
@@ -75,8 +75,9 @@ let rec f expr env cont = match expr with
         | (_) -> cont(failwith ("Predicate is not a boolean: " ^ Value.to_string x env))
       end)
   | Let (x, arg2, arg3) ->
-      let v2 = f arg2 env cont in
+      f arg2 env (fun v2 ->
       let env1 = Env.extend env x v2 in f arg3 env1 cont
+      )
   | Letrec (g, x, arg1, arg2) -> 
       let env1 = Env.extend env g (CloR (g, x, arg1, env)) in f arg2 env1 cont
   | Fun (x, arg1) -> cont (Clo(x, arg1, env) )
