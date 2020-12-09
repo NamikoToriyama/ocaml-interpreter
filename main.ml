@@ -1,3 +1,10 @@
+(* answer type : 最終結果の型 *)
+type a = Ok of a | Error of a
+
+(* 初期継続 *)
+(* id : 'a -> 'a *)
+let id x = x
+
 (* メイン関数 *)
 let go () =
   let program = Parser.start Lexer.token (Lexing.from_channel stdin) in
@@ -9,7 +16,7 @@ let go () =
     print_newline ();
     print_string "Result : "
   end;
-  print_string (Value.to_string(Eval.f program Env.empty) Env.empty);      (* 結果を表示する *)
+  print_string (Value.to_string(Eval.f program Env.empty id) Env.empty);      (* 結果を表示する *)
   print_newline ()
 
 (* スタートアップ *)
