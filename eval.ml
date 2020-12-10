@@ -79,7 +79,7 @@ let rec f expr env cont = match expr with
       let env1 = Env.extend env x v2 in f arg3 env1 cont)
   | Letrec (g, x, arg1, arg2) -> 
       let env1 = Env.extend env g (CloR (g, x, arg1, env)) in f arg2 env1 cont
-  | Fun (x, arg1) -> cont (Clo(x, arg1, env) )
+  | Fun (x, arg1) -> cont (Clo(x, arg1, env))
   | App (arg1, arg2) -> 
         f arg1 env (fun v1 -> 
         f arg2 env (fun v2 ->

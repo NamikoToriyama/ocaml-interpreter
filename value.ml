@@ -10,7 +10,7 @@ let rec list_to_string lst str = match lst with
   | first :: rest -> 
     match first with
   | VNumber(n) -> list_to_string rest (str^string_of_int n ^ " :: ")
-  | VBool (b) -> if b then list_to_string rest  str ^ " :: true" else list_to_string rest  str ^ " ::false"
+  | VBool (b) -> if b then list_to_string rest (str ^ "true :: ") else list_to_string rest (str ^ "false :: ")
   | (_) -> "value unexpected type"
 
 (* プログラムの実行結果を文字列にする関数 *)
