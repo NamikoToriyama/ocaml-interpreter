@@ -25,7 +25,9 @@ type t = Number of int                         (* 整数 *)
        | App of t * t                          (* 関数呼び出し*)
        | Nil
        | Cons of t * t
-       | Match of t * t * string * string * t 
+       | Match of t * t * string * string * t  (* match 文 *)
+       | Raise of t                            (* 例外呼び出し *)
+       | Try of t * string * t                 (* try文 *)
 
 (* プログラムを文字列にする関数 *)
 (* Syntax.to_string : Syntax.t -> string *)
@@ -58,7 +60,11 @@ let rec to_string exp = match exp with
   | Cons (arg1, arg2) ->
       "(" ^ "[" ^ to_string arg1 ^ "::" ^ to_string arg2 ^ "]" ^ ")"
   | Match (t1, t2, first, rest, t3) ->
-      "(match" ^ to_string t1 ^ " with [] -> " ^ to_string t2 ^ " | " ^ first ^ " :: " ^ rest ^ " -> " ^ to_string t3 ^ ")"
+      "(match " ^ to_string t1 ^ " with [] -> " ^ to_string t2 ^ " | " ^ first ^ " :: " ^ rest ^ " -> " ^ to_string t3 ^ ")"
+  | Raise (arg1) ->
+      "raise (Error " ^ to_string arg1 ^ ")"
+  | Try (arg1, x, arg2) ->
+      "try " ^ to_string arg1 ^ " with Error " ^ x ^ " -> " ^ to_string arg2
   
   
 (* プログラムをプリントする関数 *)
