@@ -15,7 +15,7 @@ rule token = parse
 | space+  { token lexbuf }      (* スペースは読み飛ばす *)
 | "(*" [^ '\n']* "\n"           (* ( * から行末まではコメント *)
           { token lexbuf }
-| "+"     { PLUS }   | "-"     { MINUS } | "*"     { TIMES }
+| "+"     { PLUS }   | "-"     { MINUS } | "*"     { TIMES } | "/"     { DIVIDE }
 | "="     { EQUAL }  | "<"     { LESS }  | ">"     { MORE }
 | "true"  { TRUE }   | "false" { FALSE }
 | "if"    { IF }     | "else"  { ELSE }  | "then"  { THEN }
@@ -25,6 +25,7 @@ rule token = parse
 | "match" { MATCH }  | "with"  { WITH }
 | "::"    { CONS }   | "|"     { BAR }   | ";"     { SEMI }
 | "("     { LPAREN } | ")"     { RPAREN }
+| "raise" { RAISE }  | "Error" { ERROR } | "try"   { TRY }
 | digit+                        (* 数字が１個以上 *)
           { NUMBER (int_of_string (Lexing.lexeme lexbuf)) }
 | lower (alpha | digit | '_')*  (* 小文字で始まる変数 *)
