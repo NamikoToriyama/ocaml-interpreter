@@ -61,9 +61,11 @@ let rec f expr env cont = match expr with
       f arg1 env (fun x -> 
       f arg2 env (fun y -> 
         begin match (x, y) with
-          (Ok(VNumber (n1)), Ok(VNumber (n2))) -> if n1 == n2 then cont (Ok(VBool(true))) else cont(Ok(VBool(false)))
-          | (Ok(VBool (n1)), Ok(VBool (n2))) -> if n1 == n2 then cont (Ok(VBool(true))) else cont(Ok(VBool(false)))
-          | (_, _) -> cont (failwith ("Bad arguments to =: " ^
+            (Error(VNumber (n1)), Ok(VNumber (n2))) -> cont (Error(VNumber (n1)))
+            | (Ok(VNumber (n1)), Error(VNumber (n2))) -> cont (Error(VNumber (n2)))
+            | (Ok(VNumber (n1)), Ok(VNumber (n2))) -> if n1 == n2 then cont (Ok(VBool(true))) else cont(Ok(VBool(false)))
+            | (Ok(VBool (n1)), Ok(VBool (n2))) -> if n1 == n2 then cont (Ok(VBool(true))) else cont(Ok(VBool(false)))
+            | (_, _) -> cont (failwith ("Bad arguments to =: " ^
                             Value.to_string x ^ ", " ^
                             Value.to_string y ))
         end))
@@ -71,7 +73,9 @@ let rec f expr env cont = match expr with
         f arg1 env (fun x -> 
         f arg2 env (fun y -> 
             begin match (x, y) with
-            (Ok(VNumber (n1)), Ok(VNumber (n2))) -> if n1 < n2 then cont (Ok(VBool(true))) else cont(Ok(VBool(false)))
+            (Error(VNumber (n1)), Ok(VNumber (n2))) -> cont (Error(VNumber (n1)))
+            | (Ok(VNumber (n1)), Error(VNumber (n2))) -> cont (Error(VNumber (n2)))
+            | (Ok(VNumber (n1)), Ok(VNumber (n2))) -> if n1 < n2 then cont (Ok(VBool(true))) else cont(Ok(VBool(false)))
             | (_, _) -> cont (failwith ("Bad arguments to <: " ^
                                 Value.to_string x ^ ", " ^
                                 Value.to_string y ))
@@ -81,7 +85,9 @@ let rec f expr env cont = match expr with
         f arg1 env (fun x -> 
         f arg2 env (fun y -> 
             begin match (x, y) with
-            (Ok(VNumber (n1)), Ok(VNumber (n2))) -> if n1 < n2 then cont (Ok(VBool(true))) else cont(Ok(VBool(false)))
+            (Error(VNumber (n1)), Ok(VNumber (n2))) -> cont (Error(VNumber (n1)))
+            | (Ok(VNumber (n1)), Error(VNumber (n2))) -> cont (Error(VNumber (n2)))
+            | (Ok(VNumber (n1)), Ok(VNumber (n2))) -> if n1 < n2 then cont (Ok(VBool(true))) else cont(Ok(VBool(false)))
             | (_, _) -> cont (failwith ("Bad arguments to <: " ^
                                 Value.to_string x ^ ", " ^
                                 Value.to_string y ))
@@ -89,9 +95,10 @@ let rec f expr env cont = match expr with
   | OpIf (arg1, arg2, arg3) -> 
       f arg1 env (fun x -> 
       begin match x with
-      Ok(VBool (x)) ->
+        Ok(VBool (x)) ->
             if x then f arg2 env cont else f arg3 env cont
-        | (_) -> cont(failwith ("Predicate is not a boolean: " ^ Value.to_string x ))
+        | Error(_) -> cont (x)
+        | Ok(_) -> failwith ("Predicate is not a boolean: " ^ Value.to_string x)
       end)
   | Let (x, arg2, arg3) ->
       f arg2 env (fun v2 ->
@@ -108,6 +115,7 @@ let rec f expr env cont = match expr with
             | Ok(CloR (g, x, t, env1)) ->
                 let env2 = Env.extend env1 g (CloR (g, x, t, env1)) in
                 let env3 = Env.extend env2 x (Value.ans_to_value v2) in f t env3 cont
+            | Error(_) -> cont(v1)
             | (_) -> cont(failwith ("Not a function: " ^ Value.to_string v1 ))
         end))
   | Cons (arg1, arg2) -> 
@@ -115,6 +123,7 @@ let rec f expr env cont = match expr with
         f arg2 env (fun v2 ->
         begin match v2 with
             Ok(VList (lst)) -> cont(Ok(VList(Value.ans_to_value v1::lst)))
+            | Error(_) -> cont(v2)
             | (_) -> failwith ("Not a list:" ^ Value.to_string v1)
         end))
   | Match (arg1, arg2, x, y, arg3) -> 
@@ -124,6 +133,7 @@ let rec f expr env cont = match expr with
                 | Ok(VList(first::rest)) -> 
                     let env1 = Env.extend env x first in
                     let env2 = Env.extend env1 y (VList(rest)) in f arg3 env2 cont
+                | Error(_) -> cont(v1)
                 | (_) -> failwith ("Not a list: " ^ Value.to_string v1)
             end
         )

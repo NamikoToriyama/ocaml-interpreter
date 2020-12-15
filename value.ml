@@ -30,6 +30,13 @@ let to_string value = match value with
   | Error(CloR(g, x, s, e)) -> "Error fun"
   | Error(VList (lst)) -> "Error " ^ list_to_string lst ""
 
+let to_string2 value = match value with
+    VNumber (n) -> string_of_int n
+  | VBool (b) -> if b then "true" else "false"
+  | Clo(x, s, e) -> "<fun>"
+  | CloR(g, x, s, e) -> "fun"
+  | VList (lst) -> list_to_string lst ""
+
 (* Value.ans_to_value : Value.t Value.ans_t -> Value.t *)
 let ans_to_value value = match value with
     Ok(VNumber (n)) -> VNumber (n)
