@@ -1,5 +1,5 @@
 (* op_t : ２項演算子の型 *)
-type op_t = Plus | Minus | Times | Equal | Less | More | If | Else 
+type op_t = Plus | Minus | Times | Divide | Equal | Less | More | If | Else 
 
 (* ２項演算子を文字列にする関数 *)
 (* op_to_string : op_t -> string *)
@@ -7,6 +7,7 @@ let op_to_string op = match op with
     Plus -> " + "
   | Minus -> " - "
   | Times -> " * "
+  | Divide -> "/"
   | Equal -> " = "
   | Less -> " < "
   | More -> " > "

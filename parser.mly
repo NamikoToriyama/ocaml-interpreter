@@ -46,7 +46,7 @@ let create_list exprs =
 %nonassoc EQUAL LESS MORE
 %right CONS
 %left PLUS MINUS
-%left TIMES
+%left TIMES DIVIDE
 %nonassoc UNARY
 /* nonassoc は結合なし（毎回、かっこを書かなくてはならない）、
    left は左結合、right は右結合 */
@@ -111,7 +111,7 @@ expr:
         { Match ($2, $7, $9, $11, $13) }
 | RAISE LPAREN ERROR expr RPAREN
         { Raise ($4)}
-| TRY expr WITH ERROR expr ARROW expr
+| TRY expr WITH ERROR VAR ARROW expr
         { Try ($2, $5, $7)}
 
 variables:
