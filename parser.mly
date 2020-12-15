@@ -17,15 +17,15 @@ let create_list exprs =
 /* トークンの定義 */
 %token <int> NUMBER
 /* これは、数字には int 型の値が伴うことを示している */
-%token PLUS MINUS TIMES
+%token PLUS MINUS TIMES DIVIDE
 %token TRUE FALSE
 %token EQUAL LESS MORE
 %token LPAREN RPAREN
 %token IF THEN ELSE
 %token <string> VAR
 /* これは、変数には string 型の値が伴うことを示している */
-%token LET REC IN FUN ARROW
-%token LBRACKET RBRACKET MATCH WITH CONS BAR
+%token LET REC IN FUN ARROW ERROR
+%token LBRACKET RBRACKET MATCH WITH CONS BAR RAISE TRY
 %token LPAREN RPAREN COMMA
 %token SEMI
 %token EOF
@@ -83,6 +83,8 @@ expr:
         { Op ($1, Minus, $3) }
 | expr TIMES expr
         { Op ($1, Times, $3) }
+| expr DIVIDE expr
+        { Op ($1, Divide, $3) }
 | expr EQUAL expr
         { Op ($1, Equal, $3) }
 | expr LESS expr
@@ -107,6 +109,10 @@ expr:
         { Op (Number (0), Minus, $2) }
 | MATCH expr WITH LBRACKET RBRACKET ARROW expr BAR VAR CONS VAR ARROW expr
         { Match ($2, $7, $9, $11, $13) }
+| RAISE LPAREN ERROR expr RPAREN
+        { Raise ($4)}
+| TRY expr WITH ERROR expr ARROW expr
+        { Try ($2, $5, $7)}
 
 variables:
 | VAR
