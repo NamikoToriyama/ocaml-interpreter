@@ -1,6 +1,3 @@
-(* answer type : 最終結果の型 *)
-type 'a ans_t = Ok of 'a | Error of 'a
-
 (* メイン関数 *)
 let go () =
   let program = Parser.start Lexer.token (Lexing.from_channel stdin) in
