@@ -18,13 +18,17 @@ let rec list_to_string lst str = match lst with
 
 (* プログラムの実行結果を文字列にする関数 *)
 (* Value.to_string : Value.t -> string *)
-let to_string value env = match value with
+let to_string value = match value with
     Ok(VNumber (n)) -> string_of_int n
   | Ok(VBool (b)) -> if b then "true" else "false"
   | Ok(Clo(x, s, e)) -> "<fun>"
   | Ok(CloR(g, x, s, e)) -> "fun"
   | Ok(VList (lst)) -> list_to_string lst ""
-  | Error(_) ->  "Error "
+  | Error(VNumber (n)) -> "Error " ^ string_of_int n
+  | Error(VBool (b)) -> if b then "Error true" else "Error false"
+  | Error(Clo(x, s, e)) -> "Error <fun>"
+  | Error(CloR(g, x, s, e)) -> "Error fun"
+  | Error(VList (lst)) -> "Error " ^ list_to_string lst ""
 
 (* Value.ans_to_value : Value.t Value.ans_t -> Value.t *)
 let ans_to_value value = match value with
@@ -37,6 +41,6 @@ let ans_to_value value = match value with
 
 (* プログラムの実行結果をプリントする関数 *)
 (* Value.print : Value.t -> unit *)
-let print exp env =
-  let str = to_string exp env in
+let print exp =
+  let str = to_string exp in
   print_string str
