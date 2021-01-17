@@ -27,8 +27,6 @@ let rec unify ty1 ty2 = match (ty1, ty2) with
         unify ty1' ty2'
       end
   | (Type.TVar (r1), Type.TVar (r2)) when r1 == r2 -> ()
-  | (Type.TVar ({ contents = Some(ty1') }), _) -> unify ty1' ty2
-  | (_, Type.TVar ({ contents = Some(ty2') })) -> unify ty1 ty2'
   | (Type.TVar (r1), _) ->
       begin match !r1 with
           None -> if occur r1 ty2 then raise (Unify (ty1, ty2))
@@ -49,16 +47,36 @@ let rec g expr tenv =
   try
     begin match expr with
         Number (num) -> Type.TInt
+      | Bool (b) -> Type.TBool
+      | Var (s) ->  begin try Env.get tenv s with
+        Not_found -> failwith ("Unbound variable: " ^ s)
+        end
       | Op (t1, op, t2) ->
           begin match op with
-              Plus | Minus | Times ->
+              Plus | Minus | Times | Divide ->
                 let ty1 = g t1 tenv in
                 let ty2 = g t2 tenv in
                 unify ty1 Type.TInt;
                 unify ty2 Type.TInt;
-                Type.TInt
+                Type.TInt;
+            | Equal | Less | More -> 
+              let ty1 = g t1 tenv in
+                  let ty2 = g t2 tenv in
+                  unify ty1 Type.TInt;
+                  unify ty2 Type.TInt;
+                  Type.TBool; 
             | _ -> failwith ("未サポート：" ^ Syntax.to_string expr)
           end
+      | OpIf (t1, t2, t3) -> 
+          let ty1 = g t1 tenv in
+            unify ty1 Type.TBool;
+            let ty2 = g t2 tenv in
+            let ty3 = g t3 tenv in
+              unify ty2 ty3; ty2;
+      | Let (x, t1, t2) ->
+          let ty1 = g t1 tenv in
+          let tenv' = Env.extend tenv x ty1 in
+          let ty2 = g t2 tenv' in ty2
       | Fun (x, t) ->
           let ty1 = Type.gen_type () in
           let tenv' = Env.extend tenv x ty1 in
