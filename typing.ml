@@ -81,10 +81,10 @@ let rec g expr tenv =
           let ty2 = g t2 tenv' in ty2
       | Letrec (f, x, t1, t2) -> 
           let tyx = Type.gen_type () in 
-          let tenv1 = Env.extend tenv x tyx in
-          let ty1 = Type.gen_type () in
-          let tyf = Type.TFun (tyx, ty1) in 
-          let tenv1 = Env.extend tenv1 f tyf in 
+          let _ = Env.extend tenv x tyx in
+          let ty = Type.gen_type () in
+          let tyf = Type.TFun (tyx, ty) in 
+          let tenv1 = Env.extend tenv f tyf in 
           let ty2 = g t2 tenv1 in ty2
       | Fun (x, t) ->
           let ty1 = Type.gen_type () in
@@ -109,12 +109,21 @@ let rec g expr tenv =
               end
             | _ -> failwith ("Failed cons:" ^ Syntax.to_string expr)
           end;
-      | Match (arg1, arg2, x, y, arg3) -> failwith ("未サポート：" ^ Syntax.to_string expr)
+      | Match (t1, t2, x, y, t3) -> 
+          let glist = Type.TList([Type.gen_type ()]) in
+          let tenv1 = Env.extend tenv y glist in
+          let ty = Type.gen_type () in
+          let tenv2 = Env.extend tenv1 x ty in 
+          let ty3 = g t3 tenv2 in ty3
       | Raise (t1) -> 
           let ty1 = g t1 tenv in 
           unify ty1 Type.TInt;
           Type.TInt;
-      | Try (arg1, x, arg2) -> failwith ("未サポート：" ^ Syntax.to_string expr)
+      | Try (t1, x, t2) -> 
+          let ty1 = g t1 tenv in
+          let tenv2 = Env.extend tenv x Type.TInt in
+          let ty2 = g t2 tenv2 in
+          unify ty1 ty2; ty1
     end
   with Unify (ty1, ty2) -> begin (* unify できなかった *)
     print_endline "式";
