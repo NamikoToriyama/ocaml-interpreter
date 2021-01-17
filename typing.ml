@@ -77,11 +77,24 @@ let rec g expr tenv =
           let ty1 = g t1 tenv in
           let tenv' = Env.extend tenv x ty1 in
           let ty2 = g t2 tenv' in ty2
+      | Letrec (f, x, t1, t2) -> 
+          let tyf = Type.gen_type () in
+          let tenv1 = Env.extend tenv f tyf in
+          let ty1 = g t1 tenv1 in
+          let tenv2 = Env.extend tenv1 x ty1 in
+          let ty2 = g t2 tenv2 in ty2
       | Fun (x, t) ->
           let ty1 = Type.gen_type () in
           let tenv' = Env.extend tenv x ty1 in
           let ty2 = g t tenv' in
           Type.TFun (ty1, ty2)
+      | App (t1, t2) ->
+          let ty1 = g t1 tenv in
+          let ty2 = g t2 tenv in
+          begin match ty1 with
+            Type.TFun (x, t) -> unify x ty2; t
+            |  _ -> failwith ("未サポート：" ^ Syntax.to_string expr)
+          end
       | _ -> failwith ("未サポート：" ^ Syntax.to_string expr)
     end
   with Unify (ty1, ty2) -> begin (* unify できなかった *)
