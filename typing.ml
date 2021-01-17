@@ -15,7 +15,8 @@ let rec occur r ty = match ty with
           None -> false
         | Some (ty') -> occur r ty'
       end
-
+  | Type.TList(l) -> false
+        
 (* ty1 = ty2 となるように、型変数への代入をする *)
 (* unify : Type.t -> Type.t -> unit *)
 let rec unify ty1 ty2 = match (ty1, ty2) with
@@ -51,6 +52,7 @@ let rec g expr tenv =
       | Var (s) ->  begin try Env.get tenv s with
         Not_found -> failwith ("Unbound variable: " ^ s)
         end
+      | Nil ->  Type.TList([])
       | Op (t1, op, t2) ->
           begin match op with
               Plus | Minus | Times | Divide ->
@@ -94,9 +96,25 @@ let rec g expr tenv =
           let ty2 = g t2 tenv in
           begin match ty1 with
             Type.TFun (x, t) -> unify x ty2; t
-            |  _ -> failwith ("Failed to call function：" ^ Syntax.to_string expr)
+            |  _ -> failwith ("Failed function：" ^ Syntax.to_string expr)
           end
-      | _ -> failwith ("未サポート：" ^ Syntax.to_string expr)
+      | Cons (t1, t2) -> 
+          let ty1 = g t1 tenv in
+          let ty2 = g t2 tenv in
+          begin match ty2 with
+            Type.TList(l) -> 
+              begin match l with
+                first :: rest -> unify ty1 first; Type.TList([ty1]);
+                | [] -> Type.TList([ty1])
+              end
+            | _ -> failwith ("Failed cons:" ^ Syntax.to_string expr)
+          end;
+      | Match (arg1, arg2, x, y, arg3) -> failwith ("未サポート：" ^ Syntax.to_string expr)
+      | Raise (t1) -> 
+          let ty1 = g t1 tenv in 
+          unify ty1 Type.TInt;
+          Type.TInt;
+      | Try (arg1, x, arg2) -> failwith ("未サポート：" ^ Syntax.to_string expr)
     end
   with Unify (ty1, ty2) -> begin (* unify できなかった *)
     print_endline "式";

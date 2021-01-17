@@ -3,6 +3,7 @@ type t = TInt
        | TBool
        | TFun of t * t
        | TVar of t option ref (* 型変数 *)
+       | TList of t list
 
 (* 新しい型変数を作る *)
 (* Type.gen_type : unit -> Type.t *)
@@ -25,6 +26,10 @@ let rec deref_type ty = match ty with
             r := Some (ty'');
             ty''
       end
+  | TList (l) -> begin match l with 
+      [] -> TList([])
+      | first :: rest -> deref_type first
+    end
 
 (* プログラムの型を文字列にする関数 *)
 (* Type.to_string : Type.t -> string *)
@@ -33,6 +38,10 @@ let rec to_string ty = match ty with
   | TBool -> "bool"
   | TFun (ty1, ty2) -> to_string ty1 ^ " -> " ^ to_string ty2
   | TVar (r) -> "tvar"
+  | TList (l) -> begin match l with 
+        [] -> "int list"
+        | first :: rest -> to_string first ^ " list"
+      end
 
 (* プログラムの型をプリントする関数 *)
 (* Type.print : Type.t -> unit *)
