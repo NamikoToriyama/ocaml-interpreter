@@ -28,7 +28,7 @@ let rec deref_type ty = match ty with
       end
   | TList (l) -> begin match l with 
       [] -> TList([])
-      | first :: rest -> deref_type first
+      | first :: rest -> TList([deref_type first])
     end
 
 (* プログラムの型を文字列にする関数 *)
